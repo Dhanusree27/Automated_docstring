@@ -1,0 +1,105 @@
+name: Docstring Coverage Check
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "**.py"
+      - ".github/workflows/docstring-check.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "**.py"
+
+jobs:
+  docstring-coverage:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pydocstyle coverage
+
+      - name: Run docstring coverage scan
+        id: docstring_scan
+        run: |
+          python cli.py scan . --output scan_results.json || true
+          cat scan_results.json
+
+      - name: Generate coverage report
+        id: coverage_report
+        run: |
+          python cli.py report . --format json --output coverage_report.json
+          python cli.py report . --format markdown --output coverage_report.md
+          cat coverage_report.md
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: docstring-reports-py${{ matrix.python-version }}
+          path: |
+            coverage_report.json
+            coverage_report.md
+            scan_results.json
+
+      - name: Check coverage threshold
+        run: |
+          python -c "
+          import json
+          with open('coverage_report.json') as f:
+              report = json.load(f)
+          coverage = report['summary']['overall_coverage']
+          threshold = 80
+          if coverage < threshold:
+              print(f'❌ Coverage {coverage:.1f}% is below threshold {threshold}%')
+              exit(1)
+          else:
+              print(f'✅ Coverage {coverage:.1f}% meets threshold {threshold}%')
+          "
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('coverage_report.json', 'utf8'));
+            const summary = report.summary;
+            
+            const comment = `## 📊 Docstring Coverage Report
+            
+            - **Overall Coverage:** ${summary.overall_coverage.toFixed(2)}%
+            - **Compliance:** ${summary.compliance_status}
+            - **Classes:** ${summary.documented_classes}/${summary.total_classes}
+            - **Functions:** ${summary.documented_functions}/${summary.total_functions}
+            
+            See artifacts for detailed reports.
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Fail if critical issues
+        if: failure()
+        run: |
+          echo "❌ Docstring coverage check failed!"
+          exit 1

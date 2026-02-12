@@ -1,0 +1,35 @@
+# Core Dependencies
+streamlit>=1.28.0
+python-dotenv>=1.0.0
+pydocstyle>=6.3.0
+pycodestyle>=2.11.0
+
+# LLM Provider APIs
+google-generativeai>=0.3.0
+groq>=0.4.0
+openai>=1.0.0
+
+# Data Processing & Analysis
+pandas>=2.0.0
+numpy>=1.24.0
+plotly>=5.0.0
+
+# AST & Code Analysis
+astroid>=3.0.0
+
+# Utilities
+requests>=2.31.0
+PyYAML>=6.0
+
+# Development & Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.0.0
+flake8>=6.1.0
+isort>=5.13.0
+pre-commit>=3.5.0
+
+# Type Checking
+mypy>=1.7.0
+types-PyYAML>=6.0.0
+types-requests>=2.31.0
