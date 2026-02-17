@@ -7,7 +7,6 @@ A professional, modular Python docstring generator with multi-API failover logic
 ### 1. Synthesis Engine (Multi-API Failover)
 - **Primary:** Google Gemini (gemini-1.5-flash)
 - **Secondary:** Groq (llama-3-70b-versatile)
-- **Tertiary:** OpenAI (gpt-4o-mini)
 - Automatic failover on rate limits or API errors
 - Real-time provider status monitoring
 - Robust exception handling
@@ -89,7 +88,6 @@ pip install -r requirements.txt
 # Create a .env file in the project root
 GOOGLE_API_KEY=your-google-api-key
 GROQ_API_KEY=your-groq-api-key
-OPENAI_API_KEY=your-openai-api-key
 ```
 
 ### Running the Streamlit UI
@@ -240,9 +238,8 @@ Output:
 Configured in `utils/constants.py`:
 ```python
 API_PROVIDERS = {
-    "google": {"name": "Google Gemini", "model": "gemini-1.5-flash"},
-    "groq": {"name": "Groq", "model": "llama-3-70b-versatile"},
-    "openai": {"name": "OpenAI", "model": "gpt-4o-mini"}
+    "google": {"name": "Google Gemini", "model": "gemini-2.5-flash"},
+    "groq": {"name": "Groq", "model": "llama-3.3-70b-versatile"}
 }
 ```
 
