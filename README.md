@@ -5,8 +5,8 @@ A professional, modular Python docstring generator with multi-API failover logic
 ## 🎯 Features
 
 ### 1. Synthesis Engine (Multi-API Failover)
-- **Primary:** Google Gemini (gemini-1.5-flash)
-- **Secondary:** Groq (llama-3-70b-versatile)
+- **Primary:** Google Gemini (gemini-2.5-flash)
+- **Secondary:** Groq (llama-3.3-70b-versatile)
 - Automatic failover on rate limits or API errors
 - Real-time provider status monitoring
 - Robust exception handling
