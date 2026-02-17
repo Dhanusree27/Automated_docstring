@@ -497,9 +497,8 @@ def display_ai_generation():
         with st.spinner("⏳ Analyzing and generating docstrings for entire file..."):
             try:
                 # Generate comprehensive docstrings for the entire file
-                result = st.session_state.synthesis_engine.generate_docstring(
-                    function_signature="File-level documentation",
-                    code_context=code_input,
+                result = st.session_state.synthesis_engine.generate_file_docstrings(
+                    code_content=code_input,
                     docstring_style=style_select
                 )
 

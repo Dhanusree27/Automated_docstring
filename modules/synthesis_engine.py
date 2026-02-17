@@ -255,3 +255,92 @@ Generate the docstring:"""
         """Reset all providers to available status."""
         for provider in self.provider_status:
             self.provider_status[provider] = "available"
+
+    def generate_file_docstrings(
+        self,
+        code_content: str,
+        docstring_style: str = "google"
+    ) -> Dict[str, Any]:
+        """
+        Generate docstrings for all functions and classes in a Python file.
+
+        This method parses the entire file and generates appropriate docstrings
+        for all functions, classes, and their methods.
+
+        Args:
+            code_content: The complete Python file content.
+            docstring_style: The docstring style (google, numpy, rest).
+
+        Returns:
+            Dictionary with 'docstring', 'provider', and 'success' keys.
+        """
+        prompt = self._build_file_prompt(code_content, docstring_style)
+
+        for provider in self.providers_order:
+            if self.provider_status[provider] == "available":
+                try:
+                    self.current_provider = provider
+                    result = self._call_provider(provider, prompt)
+
+                    if result:
+                        return {
+                            "docstring": result,
+                            "provider": provider.value,
+                            "success": True,
+                            "error": None
+                        }
+                except Exception as e:
+                    self.last_error = str(e)
+                    self._handle_provider_failure(provider, str(e))
+                    continue
+
+        # All providers failed
+        return {
+            "docstring": None,
+            "provider": None,
+            "success": False,
+            "error": f"All providers failed. Last error: {self.last_error}"
+        }
+
+    def _build_file_prompt(
+        self,
+        code_content: str,
+        docstring_style: str
+    ) -> str:
+        """
+        Build the prompt for generating docstrings for entire file.
+
+        Args:
+            code_content: The complete Python file content.
+            docstring_style: The docstring style.
+
+        Returns:
+            The formatted prompt for file-level docstring generation.
+        """
+        style_instructions = self._get_style_instructions(docstring_style)
+
+        prompt = f"""Generate docstrings for ALL functions, classes, and methods in the following Python file. 
+Generate complete docstrings for EVERY function and class found in the code. Do NOT skip any function or class.
+
+IMPORTANT: You MUST generate docstrings for ALL functions, ALL classes, and ALL methods in the code below.
+
+Python File:
+{code_content}
+
+{docstring_style.upper()} Style Requirements:
+{style_instructions}
+
+Strict Requirements:
+1. Generate docstrings for EVERY function in the file
+2. Generate docstrings for EVERY class in the file
+3. Generate docstrings for EVERY method inside each class
+4. Follow the exact {docstring_style.upper()} style formatting precisely
+5. Include Args, Returns, and Raises sections where applicable
+6. Do not add any introductory or concluding paragraphs
+7. Use only the structured sections as defined in the style
+8. Return the COMPLETE code with all docstrings added - not just the docstrings
+9. Preserve the original code and add docstrings to each function/class/method
+
+Generate the complete file with all docstrings:"""
+
+        return prompt

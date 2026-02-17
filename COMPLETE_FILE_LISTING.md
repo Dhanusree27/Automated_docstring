@@ -158,7 +158,6 @@ FEATURE BREAKDOWN
    Location: modules/synthesis_engine.py
    ├── Provider: Google Gemini (gemini-1.5-flash)
    ├── Provider: Groq (llama-3-70b-versatile)
-   ├── Provider: OpenAI (gpt-4o-mini)
    ├── Automatic failover on errors
    ├── Rate limit detection
    └── Provider status monitoring
